@@ -1,5 +1,13 @@
 # Changelog
 
+## 0.1.3 — 2026-11-16
+
+- Render active races at approximately 60 FPS by interpolating scene poses between original 30 Hz updates; keep the native logic gate unchanged.
+- Interpolate camera, supported scene meshes and cars, restoring endpoint values before the normal render pass.
+- Prevent the extra render pass from advancing movie/overlay updates and crash-animation physics a second time.
+- Retain original cadence in menus, videos and results; document interpolation limits and visual delay.
+- Validate 1080p/16:9, approximately 60 rendered FPS / 30 native updates per second, pause freeze, boost ON/OFF and race transitions on the Ally.
+
 ## 0.1.2 — 2026-11-16
 
 - Add an English Infinite Boost ON/OFF option to the pause menu, with controller navigation and a persistent private preference.

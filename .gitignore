@@ -8,6 +8,7 @@
 !source/run.py
 !source/build.py
 !source/hd.c
+!source/fps.c
 !source/hd.ld
 !source/controls.py
 !source/cheats.py

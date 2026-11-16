@@ -32,9 +32,11 @@ def build():
    if virtual<=relative<virtual+raw_size:return raw+relative-virtual
   raise ValueError('Address outside file')
  with tempfile.TemporaryDirectory(prefix='valve-hd-') as temp:
-  tmp=Path(temp);obj=tmp/'hd.o';elf=tmp/'hd.elf';binary=tmp/'hd.bin'
-  subprocess.run(['gcc','-m32','-Os','-ffreestanding','-fno-pie','-fno-pic','-fno-stack-protector','-fno-asynchronous-unwind-tables','-fno-unwind-tables','-c',str(ROOT/'source/hd.c'),'-o',str(obj)],check=True)
-  subprocess.run(['ld','-m','elf_i386','-T',str(ROOT/'source/hd.ld'),str(obj),'-o',str(elf)],check=True)
+  tmp=Path(temp);elf=tmp/'hd.elf';binary=tmp/'hd.bin';objects=[]
+  for name in ('hd','fps'):
+   obj=tmp/(name+'.o');objects.append(str(obj))
+   subprocess.run(['gcc','-m32','-Os','-ffreestanding','-fno-pie','-fno-pic','-fno-stack-protector','-fno-asynchronous-unwind-tables','-fno-unwind-tables','-c',str(ROOT/('source/'+name+'.c')),'-o',str(obj)],check=True)
+  subprocess.run(['ld','-m','elf_i386','-T',str(ROOT/'source/hd.ld'),*objects,'-o',str(elf)],check=True)
   subprocess.run(['objcopy','-O','binary',str(elf),str(binary)],check=True)
   symbols={parts[2]:int(parts[0],16) for line in subprocess.check_output(['nm','-n',str(elf)],text=True).splitlines() if len(parts:=line.split())==3}
   code=binary.read_bytes()
@@ -56,6 +58,10 @@ def build():
   at=offset(address)
   if data[at]!=0xe8 or address+5+struct.unpack_from('<i',data,at+1)[0]!=0x4668b7:raise SystemExit('Unexpected perspective call')
   data[at:at+5]=b'\xe8'+struct.pack('<i',symbols['perspective']-address-5)
+ for address,original_target,symbol in [(0x406ae4,0x406710,'render_60'),(0x40163b,0x412320,'video_tick'),(0x42d2ee,0x42fcb0,'car_animation')]:
+  at=offset(address)
+  if data[at]!=0xe8 or address+5+struct.unpack_from('<i',data,at+1)[0]!=original_target:raise SystemExit('Unexpected render call')
+  data[at:at+5]=b'\xe8'+struct.pack('<i',symbols[symbol]-address-5)
  (ROOT/'game/valve-ally.exe').write_bytes(data)
  (ROOT/'docs').mkdir(exist_ok=True)
  report={'original_sha256':SUPPORTED,'sha256':hashlib.sha256(data).hexdigest(),'symbols':symbols,'resolution':[1920,1080]}
