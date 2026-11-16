@@ -1,8 +1,8 @@
 # Valve Limit R — ROG Ally / Bazzite
 
-Version 0.1.0. Bring your own legally obtained game files. This repository contains only original integration code and documentation, under the MIT license. It includes no game executable, assets, saves, artwork or third-party runtime binaries.
+Version 0.1.1. Bring your own legally obtained game files. This repository contains only original integration code and documentation, under the MIT license. It includes no game executable, assets, saves, artwork or third-party runtime binaries.
 
-The integration provides direct ROG Ally controls, a pause screen, native cabinet storage backups and a local HD build. The game renders at **1440×1080**, preserving its original 4:3 aspect ratio on a 1920×1080 display, with black side bars. A small original Direct3D 9 bridge corrects the sprite projection so the interface scales with the 3D scene. The original textures and fonts remain low resolution; this is not a texture replacement pack. The native approximately 30 FPS timing is preserved.
+The integration provides direct ROG Ally controls, a pause screen, native cabinet storage backups and a local HD build. Races render at **1920×1080 with a true 16:9 camera**, preserving vertical field of view and revealing more scenery horizontally. Cars are not stretched or cropped. A small original Direct3D 9 bridge gives the interface a uniform scale and keeps it centered in a 1440×1080 safe area. Original 2D backgrounds and movies retain their proportions and can have margins; they do not gain extra artwork from a camera change. The original textures and fonts remain low resolution. The native approximately 30 FPS timing is preserved.
 
 The tested revision identifies itself as VL1.34JA. Its original `launcher.exe` SHA-256 must be:
 
@@ -56,6 +56,8 @@ This preserves the game's native saved data, not an unfinished race or a console
 
 The tested game is Japanese. No confirmed compatible English translation was found in the GitHub repositories and source searches checked on 2026-11-16, including [Windows Arcade Loader](https://github.com/aderumier/windowsarcadeloader) and [windowsloader](https://github.com/njz3/windowsloader). The cabinet settings do not expose a language selector. The external pause menu is English, but that does not translate the game itself.
 
-HD was checked in attract mode, car selection and a race on the Ally. This is an initial integration, not exhaustive validation of every course or effect. No new textures, widescreen field-of-view patch, or 60 FPS simulation patch is included. To revert to native resolution for troubleshooting, set `WAL_D3D9_FULLSCREEN_SIZE` in `source/runtime-env.json` to `640x480`; the bridge then leaves the original projection alone.
+HD was checked in attract mode, car selection and a race on the Ally. The live projection ratio and DXVK backbuffer were also inspected. This is an initial integration, not exhaustive validation of every course or effect. No replacement textures or 60 FPS simulation patch is included. For 4:3 HD, set `WAL_D3D9_FULLSCREEN_SIZE` in `source/runtime-env.json` to `1440x1080`; for native-resolution troubleshooting use `640x480`. The camera expansion is enabled only on a 1920×1080 render target.
+
+The widescreen investigation used [REA](https://github.com/morluto/rea) CLI 6.7.0 with the existing GNU objdump provider. Static evidence identified the perspective construction calls; live inspection verified a 16/9 matrix ratio and screenshots verified the result. The original vertical camera angle is preserved. Binary disassembly and game captures are private and are not distributed here. Direct3D interface contracts were checked against [Wine's d3d9.h](https://github.com/wine-mirror/wine/blob/master/include/d3d9.h).
 
 Game names identify compatibility only. This project is not affiliated with the game publisher or hardware vendors.

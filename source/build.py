@@ -49,10 +49,17 @@ def build():
  address=0x46d1a1;at=offset(address)
  if data[at:at+6]!=bytes.fromhex('ff9148010000'):raise SystemExit('Unexpected sprite draw instruction')
  data[at:at+6]=b'\xe8'+struct.pack('<i',symbols['draw_indexed']-address-5)+b'\x90'
+ address=0x419cd9;at=offset(address)
+ if data[at:at+6]!=bytes.fromhex('ff9144010000'):raise SystemExit('Unexpected video draw instruction')
+ data[at:at+6]=b'\xe8'+struct.pack('<i',symbols['draw_video']-address-5)+b'\x90'
+ for address in (0x401222,0x40154a,0x419d0c,0x421d6b):
+  at=offset(address)
+  if data[at]!=0xe8 or address+5+struct.unpack_from('<i',data,at+1)[0]!=0x4668b7:raise SystemExit('Unexpected perspective call')
+  data[at:at+5]=b'\xe8'+struct.pack('<i',symbols['perspective']-address-5)
  (ROOT/'game/valve-ally.exe').write_bytes(data)
  (ROOT/'docs').mkdir(exist_ok=True)
- report={'original_sha256':SUPPORTED,'sha256':hashlib.sha256(data).hexdigest(),'symbols':symbols,'resolution':[1440,1080]}
+ report={'original_sha256':SUPPORTED,'sha256':hashlib.sha256(data).hexdigest(),'symbols':symbols,'resolution':[1920,1080]}
  (ROOT/'docs/hd-build.json').write_text(json.dumps(report,indent=2)+'\n')
- print('Built 1440x1080 sprite correction:',report['sha256'])
+ print('Built 1920x1080 camera and UI correction:',report['sha256'])
 
 if __name__=='__main__':build()

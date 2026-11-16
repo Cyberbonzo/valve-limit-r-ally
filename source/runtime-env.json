@@ -6,5 +6,5 @@
   "WAL_MAP": "up=none,down=none,left=none,right=none,b1=up,b2=down,b3=left,b4=right,b5=btn1,b6=none",
   "DXVK_FRAME_RATE": "60",
   "DXVK_LOG_LEVEL": "info",
-  "WAL_D3D9_FULLSCREEN_SIZE": "1440x1080"
+  "WAL_D3D9_FULLSCREEN_SIZE": "1920x1080"
 }

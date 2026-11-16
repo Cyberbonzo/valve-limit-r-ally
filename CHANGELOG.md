@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.1 — 2026-11-16
+
+- Add a true 1920×1080 16:9 camera using REA-assisted analysis, preserving vertical field of view and object proportions.
+- Keep the HUD uniformly scaled and centered; retain the original movie aspect ratio.
+- Scale the opening movie's separate vertex quad and correct its Direct3D stream access.
+- Keep 1440×1080 and 640×480 as optional 4:3 modes.
+
 ## 0.1.0 — 2026-11-16
 
 - Initial ROG Ally / Bazzite integration using an external open-source cabinet runtime and existing Proton.
