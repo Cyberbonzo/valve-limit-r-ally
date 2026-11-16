@@ -5,6 +5,8 @@ typedef unsigned int U;
 typedef struct {U key,mesh,draw,epoch;float previous[6],current[6];} Pose;
 static Pose poses[2048];
 static Pose* active[1024];
+static Pose characters[32];
+static Pose* active_characters[32];
 typedef struct {U key,epoch;float previous[10],current[10];} CarPose;
 static CarPose cars[64];
 static CarPose* active_cars[64];
@@ -14,6 +16,7 @@ volatile U fps_enabled=1;
 volatile U render_frames,intermediate_frames,logic_frames,interpolated_objects;
 volatile U render_phase;
 volatile U interpolated_cars;
+volatile U interpolated_characters;
 volatile float camera_midpoint[6],camera_endpoint[6];
 
 static float delta(float x,float wrap){
@@ -54,9 +57,27 @@ void T render_60(void* graphics){
  }
  epoch++;
  float*camera=(float*)0x4e61fc;float current[6];copy6(current,camera);
- U count=0,car_count=0,visited=0,node=MEM(0x506ac4);
- while(node && count<1024 && visited++<4096){
+ U count=0,car_count=0,character_count=0,visited=0,node=MEM(0x506ac4);
+ while(node && visited++<4096){
   U next=MEM(node+0x14),draw=MEM(node+0x68),mesh=MEM(node+0x1c);
+  /* Animated characters follow the camera in world space. Their root must
+     follow the same interpolation even when the regular mesh cache is full. */
+  if(draw==0x458120 && character_count<32){
+   float*values=(float*)(node+0x3c);U slot=(node>>4)&31;
+   if(reasonable(values))for(U tries=0;tries<32;tries++,slot=(slot+1)&31){
+    Pose*p=characters+slot;
+    if(p->key!=node && p->epoch==epoch)continue;
+    U instance=MEM(node+0x10);
+    int valid=p->key==node && p->mesh==mesh && p->draw==instance && p->epoch==epoch-1 && camera_valid;
+    copy6(p->current,values);
+    if(valid){
+     for(U i=0;i<6;i++){float d=values[i]-p->previous[i];if(i>=3)d=delta(d,360.f);values[i]=p->previous[i]+d*.5f;}
+     interpolated_characters++;
+    }
+    p->key=node;p->mesh=mesh;p->draw=instance;p->epoch=epoch;
+    active_characters[character_count++]=p;break;
+   }
+  }
   if(draw==0x42d040 && car_count<64){
    U car=MEM(node+0x80),slot=(car>>4)&63;
    if(car){
@@ -76,7 +97,7 @@ void T render_60(void* graphics){
    }
   }
   /* Persistent standard mesh nodes have the same position/rotation layout. */
-  if(draw==0x4039f0 || draw==0x403ae0 || draw==0x403b70 || draw==0x403c40){
+  if(count<1024 && (draw==0x4039f0 || draw==0x403ae0 || draw==0x403b70 || draw==0x403c40)){
    float*values=(float*)(node+0x3c);
    if(reasonable(values)){
     U slot=(node>>4)&2047;
@@ -116,6 +137,9 @@ void T render_60(void* graphics){
  copy6(camera,current);copy6(camera_previous,current);camera_valid=1;
  for(U j=0;j<count;j++){
   Pose*p=active[j];copy6((float*)(p->key+0x3c),p->current);copy6(p->previous,p->current);
+ }
+ for(U j=0;j<character_count;j++){
+  Pose*p=active_characters[j];copy6((float*)(p->key+0x3c),p->current);copy6(p->previous,p->current);
  }
  for(U j=0;j<car_count;j++){
   CarPose*p=active_cars[j];float*values=(float*)(p->key+0x180);

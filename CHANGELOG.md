@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.4 — 2026-11-16
+
+- Fix camera-following character jitter by interpolating animated-character root transforms with the camera.
+- Continue bounded scene traversal after the regular mesh cache fills; reserve a separate character cache so late-list character nodes are included.
+- Restore character endpoint transforms before the final render and next simulation update; retain native skeletal-animation cadence.
+- Verify 60.05 rendered FPS / 29.98 native updates per second over ten seconds. The user confirmed the character is stable on the physical Ally screen.
+
 ## 0.1.3 — 2026-11-16
 
 - Render active races at approximately 60 FPS by interpolating scene poses between original 30 Hz updates; keep the native logic gate unchanged.
