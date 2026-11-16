@@ -1,0 +1,10 @@
+{
+  "WAL_PORT": "33707",
+  "WAL_TYPEX_JVS_ANALOG_INPUTS": ",accel,brake",
+  "WAL_TYPEX_WHEEL_PORT": "COM1",
+  "WAL_DINPUT_DISABLE": "1",
+  "WAL_MAP": "up=none,down=none,left=none,right=none,b1=up,b2=down,b3=left,b4=right,b5=btn1,b6=none",
+  "DXVK_FRAME_RATE": "60",
+  "DXVK_LOG_LEVEL": "info",
+  "WAL_D3D9_FULLSCREEN_SIZE": "1440x1080"
+}
