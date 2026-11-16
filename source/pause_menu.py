@@ -6,7 +6,7 @@ from PIL import Image,ImageDraw,ImageFont
 class Menu:
     def __init__(self,sdl):
         self.s=sdl;self.window=None;self.renderer=None;self.texture=None
-        self.selected=0;self.last=None;self.infinite=False
+        self.selected=0;self.last=None;self.infinite=False;self.error=None
         def bind(n,r,a):
             f=getattr(sdl,n);f.restype=r;f.argtypes=a;return f
         self.init=bind('SDL_InitSubSystem',C.c_int,[C.c_uint32])
@@ -42,7 +42,7 @@ class Menu:
 
     def draw(self):
         if not self.window:return
-        state=(self.selected,self.infinite)
+        state=(self.selected,self.infinite,self.error)
         if state!=self.last:
             im=Image.new('RGBA',(1920,1080),(7,13,23,255));d=ImageDraw.Draw(im)
             def text(x,y,t,size=36,color='#edf4ff'):
@@ -53,15 +53,15 @@ class Menu:
             text(185,170,'PAUSED',88)
             d.rectangle((190,300,320,308),fill='#34d4f4')
             text(190,345,'Your race is on hold.',30,'#95a8ba')
-            for i,label in enumerate(['RESUME']):
+            for i,label in enumerate(['RESUME','CHEATS: INFINITE BOOST                     '+('ON' if self.infinite else 'OFF')]):
                 y=420+i*135;active=self.selected==i
                 d.rounded_rectangle((190,y,1730,y+110),radius=14,fill='#14364d' if active else '#101f2d',outline='#34d4f4' if active else '#22364a',width=3)
                 text(235,y+32,label,34)
-            text(190,715,'CONTROLS',23,'#5fa7be')
+            text(190,690,'Cheat unavailable - see controls log' if self.error else 'Hold A during the race to use nitro. Your cheat preference is saved.',24,'#ffab8c' if self.error else '#5fa7be')
             text(190,765,'LEFT STICK   STEER     RT   GAS / CONFIRM     LT   BRAKE',29,'#95a8ba')
             text(190,820,'A   NITRO / CONFIRM     B   HANDBRAKE     X   VIEW     Y   START',29,'#95a8ba')
             d.line((190,949,1730,949),fill='#22364a',width=2)
-            text(190,984,'A / B / MENU   RESUME     LB / RB   SHIFT DOWN / UP',25,'#99afc2')
+            text(190,984,'D-PAD / STICK   SELECT     A   CONFIRM / TOGGLE     B / MENU   RESUME',25,'#99afc2')
             buf=C.create_string_buffer(im.tobytes())
             surface=self.surface(buf,1920,1080,32,1920*4,0xff,0xff00,0xff0000,0xff000000)
             if not surface:raise RuntimeError('Pause surface creation failed')

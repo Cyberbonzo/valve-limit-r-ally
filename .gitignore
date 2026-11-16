@@ -10,6 +10,7 @@
 !source/hd.c
 !source/hd.ld
 !source/controls.py
+!source/cheats.py
 !source/pause.py
 !source/pause_menu.py
 !source/progress.py

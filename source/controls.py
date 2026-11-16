@@ -5,6 +5,7 @@ from pathlib import Path
 from pause import Pause
 from pause_menu import Menu
 from progress import backup
+from cheats import Cheats
 
 pause_manager=Pause()
 
@@ -60,7 +61,8 @@ def packet(kind,payload):return struct.pack('<BBH',kind,0,len(payload))+payload
 server=socket.socket();server.setsockopt(socket.SOL_SOCKET,socket.SO_REUSEADDR,1)
 server.bind(('127.0.0.1',33707));server.listen(1);server.setblocking(False)
 pad=None;client=None;old=set();paused=False;last_status=0
-menu=Menu(s);last_menu=0;last_pids=0;pids=[]
+menu=Menu(s);cheats=Cheats();menu.infinite=cheats.enabled
+last_menu=0;last_pids=0;pids=[];old_direction=0
 started=time.monotonic();last_backup=0
 try:
  while running:
@@ -95,10 +97,19 @@ try:
                 pressed=set(t.get('buttons',[]));wheel=t.get('wheel',0);gas=t.get('gas',0);brake=t.get('brake',0)
         except (OSError,ValueError):pass
     edge=pressed-old
+    vertical=axis(pad,1)/32767 if pad else 0
+    if t:vertical=t.get('menu_y',0)
+    direction=-1 if 11 in pressed or vertical<-.6 else 1 if 12 in pressed or vertical>.6 else 0
     was_paused=paused
+    if paused:
+        if direction and direction!=old_direction:menu.selected=(menu.selected+direction)%2
+        if menu.selected==1 and (0 in edge or 13 in edge or 14 in edge):
+            cheats.toggle();menu.infinite=cheats.enabled
     if 6 in edge or (paused and (1 in edge or (0 in edge and menu.selected==0))):
         paused=not paused;set_pause(paused);print('Pause:',paused,flush=True)
     if now-last_pids>1:pids=game_pids();last_pids=now
+    cheats.update(pids)
+    menu.error=cheats.error
     if paused and now-last_menu>.1:
         menu.draw();last_menu=now
     bits=0
@@ -118,11 +129,12 @@ try:
         except OSError:client.close();client=None
     if now-last_status>1:
         last_status=now
-        (ROOT/'logs/controls-status.json').write_text(json.dumps({'controller':name(pad).decode() if pad else None,'paused':paused,'menu_selected':menu.selected,'connected':client is not None,'buttons':sorted(pressed),'wheel':wheel,'gas':gas,'brake':brake}))
+        (ROOT/'logs/controls-status.json').write_text(json.dumps({'controller':name(pad).decode() if pad else None,'paused':paused,'menu_selected':menu.selected,'infinite_boost':cheats.enabled,'boost_refills':cheats.refills,'cheat_error':cheats.error,'connected':client is not None,'buttons':sorted(pressed),'wheel':wheel,'gas':gas,'brake':brake}))
     if now-last_backup>10:
         backup();last_backup=now
-    old=pressed;time.sleep(.008)
+    old=pressed;old_direction=direction;time.sleep(.008)
 finally:
+ cheats.close()
  if paused:set_pause(False)
 
  menu.hide()

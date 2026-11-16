@@ -1,5 +1,12 @@
 # Changelog
 
+## 0.1.2 — 2026-11-16
+
+- Add an English Infinite Boost ON/OFF option to the pause menu, with controller navigation and a persistent private preference.
+- Refill local-player nitro charges during active races; retain native boost activation and duration.
+- Verify pause freeze, normal depletion with the cheat OFF, and repeated boosts with it ON.
+- Document the 60 FPS frame-gate experiment and restore native timing because fixed-step logic also speeds up.
+
 ## 0.1.1 — 2026-11-16
 
 - Add a true 1920×1080 16:9 camera using REA-assisted analysis, preserving vertical field of view and object proportions.
